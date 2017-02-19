@@ -15,10 +15,17 @@ export function activate(context: vscode.ExtensionContext) {
     // Now provide the implementation of the command with  registerCommand
     // The commandId parameter must match the command field in package.json
     let disposable = vscode.commands.registerCommand('extension.sayHello', () => {
-        // The code you place here will be executed every time your command is executed
 
-        // Display a message box to the user
-        vscode.window.showInformationMessage('Hello World!');
+        let activeEditor = vscode.window.activeTextEditor;
+        let doc = activeEditor.document;
+        let selection = activeEditor.selection;
+
+        let selectionText = doc.getText(selection);
+        let text = selectionText.replace(/[\s]*(\S+?)\s\(([^\s\,\)]+)(, optional)?\)[,]?(\s\/\/\s(\S+).*)?/gm, '\r\n/** $5 */\r\n$1: $2;');
+        
+        activeEditor.edit((builder) => {
+            builder.replace(selection, text);
+        })
     });
 
     context.subscriptions.push(disposable);
